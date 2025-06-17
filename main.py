@@ -14,7 +14,17 @@ def main():
     # Create simulation box
     box = Box(length_x, length_y, length_z, density_liquid, density_vapor)
     os.makedirs("./data", exist_ok=True)
-
+    
+    #deleta all old simulation data
+    for path in [
+    "./data/config_init.xyz",
+    "./data/config_final.xyz",
+    "./data/trajectory.xyz",
+    "./data/sim_log.txt",
+    ]:
+        if os.path.exists(path):
+            os.remove(path)
+        
     # Exportconfiguration
     box.export_xyz("./data/config_init.xyz", "Initial configuration")
 
@@ -24,8 +34,8 @@ def main():
     num_molecules = box.get_molecule_count()
     max_displacement = 1.0 / 8
     temperature = 0.8
-    total_sweeps = 1000
-    equilibration_sweeps = 500
+    total_sweeps = 30000
+    equilibration_sweeps = 5000
     log_interval = 100
     trajectory_interval = 200
     zeta = 1.00001
@@ -49,8 +59,8 @@ def main():
 
         if sweep > equilibration_sweeps:
             energy_undistorted = box.compute_potential_energy()
-            energy_distorted_1 = box.compute_distorted_energy(sx=zeta, sy=1/(zeta**2), sz=zeta)
-            energy_distorted_2 = box.compute_distorted_energy(sx=1/zeta, sy=zeta**2, sz=1/zeta)
+            energy_distorted_1 = box.compute_distorted_energy(sx=zeta**0.5, sy=1/zeta, sz=zeta**0.5)
+            energy_distorted_2 = box.compute_distorted_energy(sx=1/zeta**0.5, sy=zeta, sz=1/zeta**0.5)
 
             exponent_1 = max(-700, min(700, -(energy_distorted_1 - energy_undistorted) / temperature))
             exponent_2 = max(-700, min(700, -(energy_distorted_2 - energy_undistorted) / temperature))
@@ -91,15 +101,16 @@ def main():
 
     # Final measurement 
     final_energy = box.compute_potential_energy()
-    scale_x, scale_y, scale_z = 1.1, 1.0, 1.1
-    distorted_energy = box.compute_distorted_energy(scale_x, scale_y, scale_z)
+    sx_1 = zeta**0.5
+    sy_1 = 1/zeta
+    sz_1 = zeta**0.5
+    distorted_energy = box.compute_distorted_energy(sx_1, sy_1, sz_1)
     delta_energy = distorted_energy - final_energy
     print(f"\nΔU (energy change after distortion): {delta_energy:.6f}")
 
-    surface_area_new = surface_area_0 * scale_x * scale_z
+    surface_area_new = surface_area_0 * sx_1 * sz_1
     delta_surface_area = surface_area_new - surface_area_0
     print(f"ΔA (surface area change): {delta_surface_area:.6f}")
-
 
 if __name__ == "__main__":
     main()
