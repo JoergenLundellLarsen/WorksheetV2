@@ -1,5 +1,4 @@
 from src.ljts.boks import Box
-import matplotlib.pyplot as plt
 import os
 import math
 
@@ -50,8 +49,8 @@ def main():
 
         if sweep > equilibration_sweeps:
             energy_undistorted = box.compute_potential_energy()
-            energy_distorted_1 = box.compute_distorted_energy(sx=zeta, sy=1/zeta, sz=zeta)
-            energy_distorted_2 = box.compute_distorted_energy(sx=1/zeta, sy=zeta, sz=1/zeta)
+            energy_distorted_1 = box.compute_distorted_energy(sx=zeta, sy=1/(zeta**2), sz=zeta)
+            energy_distorted_2 = box.compute_distorted_energy(sx=1/zeta, sy=zeta**2, sz=1/zeta)
 
             exponent_1 = max(-700, min(700, -(energy_distorted_1 - energy_undistorted) / temperature))
             exponent_2 = max(-700, min(700, -(energy_distorted_2 - energy_undistorted) / temperature))

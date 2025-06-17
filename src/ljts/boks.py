@@ -1,6 +1,7 @@
 import random
 import math
 from src.ljts.Molecule import Molecule
+import os
 
 class Box:
     def __init__(self, length_x, length_y, length_z, density_liquid, density_vapor):
@@ -157,13 +158,17 @@ class Box:
             f.write(comment + "\n")
             for mol in self._molecules:
                 x, y, z = mol.get_position()
-                f.write(f"Ar {x:.6f} {y:.6f} {z:.6f}\n")
+                f.write(f"Position x:{x:.6f} y:{y:.6f} z:{z:.6f}\n")
 
     def append_xyz_frame(self, filepath, comment=""):
         # Append current frame to trajectory in XYZ format
+        trajectory_path = "./data/trajectory.xyz"
+        if os.path.exists(trajectory_path):
+            os.remove(trajectory_path)
+
         with open(filepath, 'a', encoding='utf-8') as f:
             f.write(f"{len(self._molecules)}\n")
             f.write(comment + "\n")
             for mol in self._molecules:
                 x, y, z = mol.get_position()
-                f.write(f"Ar {x:.6f} {y:.6f} {z:.6f}\n")
+                f.write(f"Position x:{x:.6f} y:{y:.6f} z:{z:.6f}\n")
