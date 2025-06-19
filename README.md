@@ -23,10 +23,10 @@ python main.py config/config.json
 bash/powershell
 pip install -r requirements.txt
 
-##Results
+## Results
 - All results end up in the data folder.
 
-##Edit parameters of the simulation
+## Edit parameters of the simulation
 - Edit the config.json file.
 
 Developer: Jørgen Lundell Larsen

@@ -1,11 +1,23 @@
-# orchestrator.py
 import json
 
 class Orchestrator:
+    """
+    Class responsible for loading and storing simulation parameters from a JSON configuration file.
+    
+    """
+
     def __init__(self, json_path):
+        """
+        Initializes the Orchestrator by reading simulation parameters from a JSON file.
+
+        Parameters:
+            json_path (str): Path to the JSON configuration file containing simulation parameters.
+
+        """
         with open(json_path, 'r') as f:
             config = json.load(f)
 
+        # Required simulation parameters from JSON config
         self.Lx = config["Lx"]
         self.Ly = config["Ly"]
         self.Lz = config["Lz"]
