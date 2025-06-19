@@ -5,10 +5,11 @@
   "density_liquid": 0.73,
   "density_vapor": 0.02,
   "temperature": 0.8,
-  "total_sweeps": 100000,
-  "equilibration_sweeps": 40000,
+  "total_sweeps": 5000,
+  "equilibration_sweeps": 1000,
   "log_interval": 3,
   "trajectory_interval": 1000,
   "max_displacement": 0.125,
   "zeta": 1.00001
 }
+

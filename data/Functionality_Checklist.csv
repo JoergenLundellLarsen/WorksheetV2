@@ -1,0 +1,16 @@
+Functionality,Implemented (Y/N),Tested/Validated (Y/N),Responsible
+Read simulation configuration from JSON file,Y,Y,Jørgen
+Initialize simulation box with correct dimensions and densities,Y,Y,Jørgen
+Run Monte Carlo sweeps,Y,Y,Jørgen
+Compute potential energy,Y,Y,Jørgen
+Compute distorted energy for surface tension,Y,Y,Jørgen
+Compute exp(-ΔU/T) for both distortions,Y,Y,Jørgen
+Block average analysis,Y,Y,Jørgen
+Autocorrelation analysis,Y,Y,Jørgen
+Surface tension estimation with error,Y,Y,Jørgen
+Export initial and final configurations to XYZ files,Y,Y,Jørgen
+Export trajectory during simulation,Y,Y,Jørgen
+Write results to a log file,Y,Y,Jørgen
+Plot and save graphs for block averages and autocorrelations,Y,Y,Jørgen
+
+Note: I only used pytest on output files and orchestrator. The rest is tested due to creating the code.
