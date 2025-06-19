@@ -1,0 +1,6 @@
+Initial potential energy: 6185389442929.856445
+Optimal block size (energies): 571
+<Epot> = -564.368183 ± 2.075614
+Optimal block size (exp(-ΔU/T)): 12
+Surface tension γ = 0.432552 ± 0.029716
+Runtime (mins): 22.68
