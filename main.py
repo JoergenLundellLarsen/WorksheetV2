@@ -18,7 +18,7 @@ def main():
 
     orchestrator = Orchestrator(sys.argv[1])
 
-    # Read all parameters simply
+    # Read all parameters
     Lx = orchestrator.Lx
     Ly = orchestrator.Ly
     Lz = orchestrator.Lz
