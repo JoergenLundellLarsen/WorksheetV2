@@ -1,7 +1,7 @@
 from src.ljts.boks import Box
 import os
 import math
-
+from src.timeseries.autocorr import compute_autocorrelation
 
 def main():
     # Box dimensions and densities
@@ -14,28 +14,27 @@ def main():
     # Create simulation box
     box = Box(length_x, length_y, length_z, density_liquid, density_vapor)
     os.makedirs("./data", exist_ok=True)
-    
-    #deleta all old simulation data
+
+    # delete old simulation data
     for path in [
-    "./data/config_init.xyz",
-    "./data/config_final.xyz",
-    "./data/trajectory.xyz",
-    "./data/sim_log.txt",
+        "./data/config_init.xyz",
+        "./data/config_final.xyz",
+        "./data/trajectory.xyz",
+        "./data/sim_log.txt",
     ]:
         if os.path.exists(path):
             os.remove(path)
-        
-    # Exportconfiguration
+
+    # Export initial configuration
     box.export_xyz("./data/config_init.xyz", "Initial configuration")
 
     initial_energy = box.compute_potential_energy()
     print(f"Initial potential energy: {initial_energy:.6f}")
 
-    num_molecules = box.get_molecule_count()
     max_displacement = 1.0 / 8
     temperature = 0.8
-    total_sweeps = 30000
-    equilibration_sweeps = 5000
+    total_sweeps = 1000
+    equilibration_sweeps = 500
     log_interval = 100
     trajectory_interval = 200
     zeta = 1.00001
@@ -44,6 +43,10 @@ def main():
     sum_expansion_2 = 0.0
     sum_energy = 0.0
     sample_count = 0
+
+    energies = []
+    exp_energies_1 = []
+    exp_energies_2 = []
 
     log_lines = []
     log_filename = "./data/sim_log.txt"
@@ -73,6 +76,10 @@ def main():
             sum_energy += energy_undistorted
             sample_count += 1
 
+            energies.append(energy_undistorted)
+            exp_energies_1.append(exp_1)
+            exp_energies_2.append(exp_2)
+
         if sweep % trajectory_interval == 0:
             box.append_xyz_frame("./data/trajectory.xyz", f"Sweep {sweep}")
 
@@ -99,18 +106,10 @@ def main():
     with open(log_filename, "w", encoding="utf-8") as f:
         f.write("\n".join(log_lines))
 
-    # Final measurement 
-    final_energy = box.compute_potential_energy()
-    sx_1 = zeta**0.5
-    sy_1 = 1/zeta
-    sz_1 = zeta**0.5
-    distorted_energy = box.compute_distorted_energy(sx_1, sy_1, sz_1)
-    delta_energy = distorted_energy - final_energy
-    print(f"\nΔU (energy change after distortion): {delta_energy:.6f}")
-
-    surface_area_new = surface_area_0 * sx_1 * sz_1
-    delta_surface_area = surface_area_new - surface_area_0
-    print(f"ΔA (surface area change): {delta_surface_area:.6f}")
+    # Autocorrelation analysis
+    compute_autocorrelation(energies, lags=100, plot=True, title="Autocorrelation of Potential Energy")
+    compute_autocorrelation(exp_energies_1, lags=100, plot=True, title="Autocorrelation of Exp(-ΔU/T) scenario 1")
+    compute_autocorrelation(exp_energies_2, lags=100, plot=True, title="Autocorrelation of Exp(-ΔU/T) scenario 2")
 
 if __name__ == "__main__":
     main()
