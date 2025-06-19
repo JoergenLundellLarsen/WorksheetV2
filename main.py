@@ -1,4 +1,5 @@
 from src.ljts.boks import Box
+from src.ljts.orchestrator import Orchestrator
 import os
 import math
 import numpy as np
@@ -6,16 +7,34 @@ from src.timeseries.autocorr import compute_autocorrelation, estimate_autocorr_t
 from src.timeseries.block_avg_analysis import block_average, plot_block_averaging
 import matplotlib.pyplot as plt
 import time
+import sys
+
 def main():
     starting_time = time.time()
-    length_x = 5
-    length_y = 40
-    length_z = 5
-    density_liquid = 0.73
-    density_vapor = 0.02
 
-    box = Box(length_x, length_y, length_z, density_liquid, density_vapor)
+    if len(sys.argv) < 2:
+        print("Usage: python main.py <path_to_json>")
+        return
+
+    orchestrator = Orchestrator(sys.argv[1])
+
+    # Read all parameters simply
+    Lx = orchestrator.Lx
+    Ly = orchestrator.Ly
+    Lz = orchestrator.Lz
+    density_liquid = orchestrator.density_liquid
+    density_vapor = orchestrator.density_vapor
+    temperature = orchestrator.temperature
+    total_sweeps = orchestrator.total_sweeps
+    equilibration_sweeps = orchestrator.equilibration_sweeps
+    log_interval = orchestrator.log_interval
+    trajectory_interval = orchestrator.trajectory_interval
+    max_displacement = orchestrator.max_displacement
+    zeta = orchestrator.zeta
+
+    box = Box(Lx, Ly, Lz, density_liquid, density_vapor)
     os.makedirs("./data", exist_ok=True)
+    os.makedirs("./data/plots", exist_ok=True)
 
     for path in [
         "./data/config_init.xyz",
@@ -30,14 +49,6 @@ def main():
     box.export_xyz("./data/config_init.xyz", "Initial configuration")
     initial_energy = box.compute_potential_energy()
     print(f"Initial potential energy: {initial_energy:.6f}")
-
-    max_displacement = 1.0 / 8
-    temperature = 0.8
-    total_sweeps = 10000
-    equilibration_sweeps = 5000
-    log_interval = 10
-    trajectory_interval = 200
-    zeta = 1.00001
 
     energies = []
     exp_energies_1 = []
@@ -66,64 +77,64 @@ def main():
             box.append_xyz_frame("./data/trajectory.xyz", f"Sweep {sweep}")
 
     compute_autocorrelation(
-        energies, 
-        lags=100, 
-        plot=True, 
+        energies,
+        lags=100,
+        plot=True,
         title="Autocorrelation of Potential Energy",
         filename="./data/plots/autocorr_potential_energy.png"
     )
 
     compute_autocorrelation(
-        exp_energies_1, 
-        lags=100, 
-        plot=True, 
+        exp_energies_1,
+        lags=100,
+        plot=True,
         title="Autocorrelation of Exp(-ΔU/T) Scenario 1",
         filename="./data/plots/autocorr_exp_energy.png"
     )
     compute_autocorrelation(
-        exp_energies_2, 
-        lags=100, 
-        plot=True, 
+        exp_energies_2,
+        lags=100,
+        plot=True,
         title="Autocorrelation of Exp(-ΔU/T) Scenario 2",
         filename="./data/plots/autocorr_exp_energy_2.png"
     )
 
     block_size_energies = estimate_autocorr_time(energies)
     num_blocks_energies = len(energies) // block_size_energies
-
     mean_Epot, error_Epot, _ = block_average(energies, num_blocks_energies)
 
     block_size_exp1 = estimate_autocorr_time(exp_energies_1)
     block_size_exp2 = estimate_autocorr_time(exp_energies_2)
     num_blocks_exp1 = len(exp_energies_1) // block_size_exp1
     num_blocks_exp2 = len(exp_energies_2) // block_size_exp2
+
     mean_exp1, error_exp1, _ = block_average(exp_energies_1, num_blocks_exp1)
     mean_exp2, error_exp2, _ = block_average(exp_energies_2, num_blocks_exp2)
     gamma = -temperature * np.log(mean_exp1) / delta_area_1
     gamma_error = abs((temperature / (mean_exp1 * delta_area_1)) * error_exp1)
 
     plot_block_averaging(
-        energies, 
-        max_blocks=len(energies) // estimate_autocorr_time(energies), 
+        energies,
+        max_blocks=num_blocks_energies,
         title="Block Averaging of Potential Energy",
         filename="./data/plots/block_avg_potential_energy.png"
     )
+    plot_block_averaging(
+        exp_energies_1,
+        max_blocks=num_blocks_exp1//30, #reduce number of blocks in the plot
+        title="Block Averaging of Exp(-ΔU/T) Scenario 1",
+        filename="./data/plots/block_avg_exp_energy.png"
+    )
+    plot_block_averaging(
+        exp_energies_2,
+        max_blocks=num_blocks_exp2//30,
+        title="Block Averaging of Exp(-ΔU/T) Scenario 2",
+        filename="./data/plots/block_avg_exp_energy_2.png"
+    )
 
-    plot_block_averaging(
-        exp_energies_1, 
-        max_blocks=len(energies) // estimate_autocorr_time(exp_energies_1), 
-        title="Block Averaging of Exp(-ΔU/T) Scenario 1",
-        filename="./data/plots/block_avg_exp_energy.png"
-    )
-    plot_block_averaging(
-        exp_energies_2, 
-        max_blocks=len(energies) // estimate_autocorr_time(exp_energies_2), 
-        title="Block Averaging of Exp(-ΔU/T) Scenario 1",
-        filename="./data/plots/block_avg_exp_energy.png"
-    )
     stop_time = time.time()
-    run_time = (stop_time-starting_time)/60
-    
+    run_time = (stop_time - starting_time) / 60
+
     with open("./data/results_log.txt", "w", encoding="utf-8") as f:
         f.write(f"Initial potential energy: {initial_energy:.6f}\n")
         f.write(f"Optimal block size (energies): {block_size_energies}\n")
@@ -133,5 +144,6 @@ def main():
         f.write(f"Optimal block size (exp(-ΔU/T)): {block_size_exp1}\n")
         f.write(f"Surface tension γ = {gamma:.6f} ± {gamma_error:.6f}\n")
         f.write(f"Runtime (mins): {run_time:.2f}\n")
+
 if __name__ == "__main__":
     main()

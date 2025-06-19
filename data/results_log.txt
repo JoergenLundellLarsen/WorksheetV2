@@ -1,8 +1,8 @@
-Initial potential energy: 23984300878.267082
-Optimal block size (energies): 9
-<Epot> = -568.817821 ± 2.894577
-<exp(-ΔU/T)> scenario 1 = 0.999664 ± 0.000084
-<exp(-ΔU/T)> scenario 2 = 1.000336 ± 0.000084
-Optimal block size (exp(-ΔU/T)): 2
-Surface tension γ = 0.537619 ± 0.133762
-Runtime (mins): 5.02
+Initial potential energy: 16228893237787.878906
+Optimal block size (energies): 270
+<Epot> = -571.604035 ± 2.534034
+<exp(-ΔU/T)> scenario 1 = 0.999712 ± 0.000019
+<exp(-ΔU/T)> scenario 2 = 1.000288 ± 0.000019
+Optimal block size (exp(-ΔU/T)): 5
+Surface tension γ = 0.460186 ± 0.029837
+Runtime (mins): 22.92

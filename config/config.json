@@ -1,0 +1,14 @@
+{
+  "Lx": 5,
+  "Ly": 40,
+  "Lz": 5,
+  "density_liquid": 0.73,
+  "density_vapor": 0.02,
+  "temperature": 0.8,
+  "total_sweeps": 40000,
+  "equilibration_sweeps": 20000,
+  "log_interval": 3,
+  "trajectory_interval": 1000,
+  "max_displacement": 0.125,
+  "zeta": 1.00001
+}
