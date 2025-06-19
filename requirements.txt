@@ -1,0 +1,5 @@
+matplotlib
+numpy
+statsmodels
+pytest
+setuptools
